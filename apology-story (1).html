@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sorry — Tap to Continue</title>
+<meta name="description" content="A little step-by-step apology.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎀</text></svg>">
+
+<!-- Google Fonts: Baloo 2 (rounded, playful display) + Nunito (friendly body text) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+
+  /* ==========================================================================
+     DESIGN TOKENS
+  ========================================================================== */
+  :root {
+    --pink-line:     #F5A9C6;  /* gingham background lines */
+    --pink-strong:   #E0457B;  /* headings / names */
+    --pink-btn:      #EC4899;  /* primary buttons */
+    --pink-btn-dark: #D6357A;
+    --gray-btn:      #ECE7EA;  /* secondary / "no" buttons */
+    --gray-btn-text: #6B6475;
+    --text-dark:     #3A3540;
+    --text-soft:     #8B8591;
+    --card-bg:       #FFFFFF;
+    --page-bg:       #FFF6FA;
+    --radius:        26px;
+    --radius-sm:     16px;
+    --font-display:  'Baloo 2', 'Nunito', sans-serif;
+    --font-body:     'Nunito', sans-serif;
+  }
+
+  /* ==========================================================================
+     RESET & BASE
+  ========================================================================== */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--text-dark);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button {
+    font-family: inherit;
+    border: none;
+    background: none;
+    cursor: pointer;
+  }
+
+  u { text-decoration-color: var(--pink-strong); }
+
+  /* keyboard focus ring */
+  button:focus-visible {
+    outline: 3px solid var(--pink-strong);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+
+  /* ==========================================================================
+     BACKGROUND — soft gingham, ambient light, scattered bows + sparkles
+  ========================================================================== */
+  .gingham-bg {
+    position: fixed;
+    inset: 0;
+    z-index: -3;
+    background-color: var(--page-bg);
+    background-image:
+      radial-gradient(circle at 22% 18%, rgba(255,255,255,0.75), transparent 45%),
+      radial-gradient(circle at 80% 12%, rgba(255,214,229,0.55), transparent 42%),
+      radial-gradient(circle at 85% 85%, rgba(245,169,198,0.35), transparent 45%),
+      radial-gradient(circle at 12% 82%, rgba(255,241,247,0.7), transparent 42%),
+      repeating-linear-gradient(to right, rgba(245,169,198,0.28) 0, rgba(245,169,198,0.28) 16px, transparent 16px, transparent 40px),
+      repeating-linear-gradient(to bottom, rgba(245,169,198,0.28) 0, rgba(245,169,198,0.28) 16px, transparent 16px, transparent 40px);
+  }
+
+  /* soft vignette so the eye settles toward the center card */
+  .gingham-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, transparent 55%, rgba(224,69,123,0.07) 100%);
+  }
+
+  .bows {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .bow {
+    position: absolute;
+    font-size: 2rem;
+    opacity: 0.9;
+    filter: drop-shadow(0 3px 5px rgba(224,69,123,0.18));
+    animation: bow-sway 4s ease-in-out infinite;
+  }
+
+  /* smaller, softer bows read as "further away" for a little depth */
+  .bow--far {
+    opacity: 0.55;
+    filter: drop-shadow(0 2px 3px rgba(224,69,123,0.1));
+  }
+
+  .sparkle {
+    position: absolute;
+    color: var(--pink-line);
+    animation: sparkle-twinkle 2.6s ease-in-out infinite;
+  }
+
+  @keyframes bow-sway {
+    0%, 100% { transform: rotate(-7deg) translateY(0); }
+    50%      { transform: rotate(7deg) translateY(-7px); }
+  }
+
+  @keyframes sparkle-twinkle {
+    0%, 100% { opacity: 0.25; transform: scale(0.8) rotate(0deg); }
+    50%      { opacity: 1;    transform: scale(1.2) rotate(20deg); }
+  }
+
+  /* ==========================================================================
+     PROGRESS DOTS — shows how far through the flow you are
+  ========================================================================== */
+  .progress-dots {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
+    display: flex;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    padding: 8px 12px;
+    border-radius: 100px;
+    box-shadow: 0 4px 14px rgba(224, 69, 123, 0.12);
+  }
+
+  .progress-dots .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(245, 169, 198, 0.55);
+    transition: background 0.3s ease, transform 0.3s ease, width 0.3s ease;
+  }
+
+  .progress-dots .dot.is-done {
+    background: var(--pink-btn-dark);
+  }
+
+  .progress-dots .dot.is-current {
+    background: var(--pink-btn);
+    width: 20px;
+    border-radius: 4px;
+  }
+
+  /* ==========================================================================
+     STAGE + SCREENS (one visible at a time, with a soft crossfade between)
+  ========================================================================== */
+  .stage {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 20px;
+  }
+
+  /* soft glow behind the card so it lifts off the busy gingham pattern */
+  .stage::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 520px;
+    height: 520px;
+    max-width: 130vw;
+    max-height: 130vw;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0) 68%);
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .screen {
+    display: none;
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .screen.is-active {
+    display: block;
+    animation: screen-in 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .screen.is-leaving {
+    display: block;
+    animation: screen-out 0.22s cubic-bezier(0.4, 0, 1, 1) both;
+  }
+
+  @keyframes screen-in {
+    from { opacity: 0; transform: translateY(18px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @keyframes screen-out {
+    from { opacity: 1; transform: translateY(0) scale(1); }
+    to   { opacity: 0; transform: translateY(-12px) scale(0.97); }
+  }
+
+  .card {
+    position: relative;
+    background: linear-gradient(180deg, #FFFFFF 0%, #FFFBFD 100%);
+    border-radius: var(--radius);
+    padding: 46px 32px;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(224, 69, 123, 0.08), 0 22px 48px rgba(224, 69, 123, 0.2);
+    border: 1px solid rgba(245, 169, 198, 0.5);
+  }
+
+  /* ==========================================================================
+     TEXT STYLES
+  ========================================================================== */
+  .msg-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--pink-strong);
+    font-size: 1.3rem;
+    margin-bottom: 6px;
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--pink-strong);
+    font-size: 1.2rem;
+    margin-bottom: 4px;
+  }
+
+  .msg-line {
+    font-size: 1.02rem;
+    margin-top: 10px;
+    line-height: 1.55;
+  }
+
+  .msg-line--small { font-size: 0.88rem; color: var(--text-soft); }
+  .msg-line--big   { font-size: 1.35rem; font-weight: 700; margin-top: 18px; }
+
+  /* ==========================================================================
+     MASCOTS — animated emoji, never stationary, each on its own soft "stage"
+  ========================================================================== */
+  .mascot {
+    position: relative;
+    font-size: 4.4rem;
+    line-height: 1;
+    display: inline-block;
+    margin-bottom: 14px;
+    z-index: 1;
+    filter: drop-shadow(0 8px 12px rgba(224, 69, 123, 0.18));
+  }
+
+  /* soft glow "stage" behind the mascot */
+  .mascot::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 104px;
+    height: 104px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(245, 169, 198, 0.4) 0%, rgba(245, 169, 198, 0) 70%);
+    border-radius: 50%;
+    z-index: -1;
+  }
+
+  /* soft grounding shadow beneath the mascot */
+  .mascot::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    width: 42px;
+    height: 9px;
+    transform: translateX(-50%);
+    background: rgba(224, 69, 123, 0.18);
+    border-radius: 50%;
+    filter: blur(4px);
+    z-index: -1;
+  }
+
+  .mascot--float { animation: mascot-float 3s ease-in-out infinite; }
+  @keyframes mascot-float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50%      { transform: translateY(-8px) rotate(-3deg); }
+  }
+
+  .mascot--bob { animation: mascot-bob 2.4s ease-in-out infinite; }
+  @keyframes mascot-bob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-10px); }
+  }
+
+  .mascot--shake { animation: mascot-shake 0.45s ease-in-out infinite; }
+  @keyframes mascot-shake {
+    0%, 100% { transform: rotate(0deg); }
+    25%      { transform: rotate(-6deg); }
+    75%      { transform: rotate(6deg); }
+  }
+
+  .mascot--dance { animation: mascot-dance 0.8s ease-in-out infinite; }
+  @keyframes mascot-dance {
+    0%, 100% { transform: rotate(-16deg); }
+    50%      { transform: rotate(16deg); }
+  }
+
+  .mascot--bounce { animation: mascot-bounce 1s cubic-bezier(0.34, 1.56, 0.64, 1) infinite; }
+  @keyframes mascot-bounce {
+    0%, 100% { transform: scale(1) translateY(0); }
+    50%      { transform: scale(1.08) translateY(-6px); }
+  }
+
+  .mascot--blink { animation: mascot-blink 3.2s ease-in-out infinite; }
+  @keyframes mascot-blink {
+    0%, 92%, 100% { transform: scaleY(1); }
+    96%           { transform: scaleY(0.1); }
+  }
+
+  /* ==========================================================================
+     BUTTONS
+  ========================================================================== */
+  .btn-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 26px;
+    flex-wrap: wrap;
+    transition: opacity 0.5s ease;
+  }
+
+  .btn-row.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+    height: 0;
+    overflow: hidden;
+    margin-top: 0;
+  }
+
+  .btn {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 15px 30px;
+    border-radius: 100px;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, opacity 0.2s ease;
+  }
+
+  .btn:hover  { transform: scale(1.05) translateY(-2px); }
+  .btn:active { transform: scale(0.96); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #EC4899, var(--pink-btn-dark));
+    color: white;
+    box-shadow: 0 8px 20px rgba(236, 72, 153, 0.35), 0 2px 6px rgba(236, 72, 153, 0.25);
+  }
+
+  .btn-primary:hover {
+    box-shadow: 0 12px 26px rgba(236, 72, 153, 0.42), 0 4px 10px rgba(236, 72, 153, 0.3);
+  }
+
+  .btn-secondary {
+    background: var(--gray-btn);
+    color: var(--gray-btn-text);
+  }
+
+  .btn-whatsapp {
+    background: linear-gradient(135deg, #2EE06B, #1DA851);
+    color: white;
+    box-shadow: 0 8px 20px rgba(37, 211, 102, 0.35), 0 2px 6px rgba(37, 211, 102, 0.25);
+  }
+
+  .btn-whatsapp:hover {
+    box-shadow: 0 12px 26px rgba(37, 211, 102, 0.42), 0 4px 10px rgba(37, 211, 102, 0.3);
+  }
+
+  /* the terminal "No" — visually disabled, and rejects the click with a warning */
+  .btn-disabled {
+    background: var(--gray-btn);
+    color: var(--gray-btn-text);
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-disabled:hover  { transform: none; }
+  .btn-disabled:active { transform: none; }
+
+  .btn-shake { animation: btn-shake 0.4s ease; }
+
+  @keyframes btn-shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+  }
+
+  /* toast shown when the disabled "No" is clicked */
+  .toast {
+    position: fixed;
+    top: 22px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-16px);
+    background: var(--text-dark);
+    color: white;
+    padding: 13px 22px;
+    border-radius: 100px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.85rem;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+    z-index: 10000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    text-align: center;
+    max-width: 88vw;
+  }
+
+  .toast.is-visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ==========================================================================
+     APOLOGY SCREEN — progressive line reveal
+  ========================================================================== */
+  .reveal-lines .msg-line {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .reveal-lines .msg-line.is-shown {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ==========================================================================
+     LISTEN SCREEN
+  ========================================================================== */
+
+  /* ==========================================================================
+     PROMISES SCREEN
+  ========================================================================== */
+  .promise-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 22px;
+  }
+
+  .promise-pill {
+    background: var(--pink-btn);
+    color: white;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 15px 18px;
+    border-radius: var(--radius-sm);
+    text-align: center;
+    transition: transform 0.2s ease, background 0.3s ease, color 0.3s ease;
+  }
+
+  .promise-pill:not(.is-revealed):hover { transform: scale(1.03); }
+
+  .promise-pill.is-revealed {
+    background: var(--page-bg);
+    color: var(--text-dark);
+    font-family: var(--font-body);
+    font-weight: 500;
+    border: 1.5px solid rgba(245, 169, 198, 0.7);
+    cursor: default;
+  }
+
+  .promise-pill.is-revealing {
+    animation: pill-reveal 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes pill-reveal {
+    0%   { transform: scale(1);    }
+    45%  { transform: scale(1.05); }
+    100% { transform: scale(1);    }
+  }
+
+  /* ==========================================================================
+     GIFTS SCREEN
+  ========================================================================== */
+  .gift-row {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 20px;
+  }
+
+  .gift-box {
+    font-size: 2.5rem;
+    background: var(--page-bg);
+    border: 2px solid rgba(245, 169, 198, 0.55);
+    border-radius: 20px;
+    padding: 16px 20px;
+    animation: mascot-bob 2.6s ease-in-out infinite;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .gift-box:hover { transform: scale(1.08) translateY(-4px); }
+
+  .gift-box.is-opened {
+    opacity: 0.4;
+    animation: none;
+    pointer-events: none;
+  }
+
+  /* ==========================================================================
+     TREATS SCREEN
+  ========================================================================== */
+  .treat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 22px;
+  }
+
+  .treat-box {
+    font-size: 2.4rem;
+    background: var(--page-bg);
+    border: 2px solid rgba(245, 169, 198, 0.55);
+    border-radius: 20px;
+    padding: 20px;
+    animation: mascot-bob 2.8s ease-in-out infinite;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .treat-box:hover { transform: scale(1.08) translateY(-4px); }
+
+  .gift-box.pop, .treat-box.pop {
+    animation: box-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes box-pop {
+    0%   { transform: scale(1);    }
+    45%  { transform: scale(1.22); }
+    100% { transform: scale(1);    }
+  }
+
+  /* ==========================================================================
+     FINAL SCREEN
+  ========================================================================== */
+  .final-success {
+    margin-top: 18px;
+    opacity: 0;
+  }
+
+  .final-success .msg-line--big {
+    color: var(--pink-strong);
+  }
+
+  .confetti-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    pointer-events: none;
+    display: none;
+  }
+
+  /* ==========================================================================
+     RESPONSIVE
+  ========================================================================== */
+  @media (max-width: 380px) {
+    .card { padding: 34px 22px; }
+    .mascot { font-size: 3.8rem; }
+    .treat-box { padding: 16px; font-size: 2rem; }
+    .gift-box { padding: 14px 16px; font-size: 2.1rem; }
+  }
+
+</style>
+</head>
+<body>
+
+  <div class="gingham-bg" aria-hidden="true"></div>
+  <div class="bows" aria-hidden="true">
+    <span class="bow" style="top:3%; left:6%; font-size:2.3rem; animation-delay:0s;">🎀</span>
+    <span class="bow" style="top:4%; right:7%; font-size:2.3rem; animation-delay:0.6s;">🎀</span>
+    <span class="bow bow--far" style="top:16%; left:16%; font-size:1.1rem; animation-delay:1s;">🎀</span>
+    <span class="bow" style="top:22%; left:2%; font-size:1.5rem; animation-delay:1.2s;">🎀</span>
+    <span class="bow" style="top:20%; right:3%; font-size:1.5rem; animation-delay:1.8s;">🎀</span>
+    <span class="bow bow--far" style="top:14%; right:18%; font-size:1.1rem; animation-delay:2.3s;">🎀</span>
+    <span class="bow" style="bottom:18%; left:4%; font-size:1.6rem; animation-delay:0.3s;">🎀</span>
+    <span class="bow" style="bottom:16%; right:5%; font-size:1.6rem; animation-delay:0.9s;">🎀</span>
+    <span class="bow bow--far" style="bottom:26%; left:14%; font-size:1.2rem; animation-delay:1.6s;">🎀</span>
+    <span class="bow" style="bottom:3%; left:8%; font-size:2rem; animation-delay:1.5s;">🎀</span>
+    <span class="bow" style="bottom:4%; right:9%; font-size:2rem; animation-delay:2.1s;">🎀</span>
+    <span class="bow bow--far" style="bottom:28%; right:15%; font-size:1.2rem; animation-delay:0.5s;">🎀</span>
+
+    <span class="sparkle" style="top:10%; left:38%; font-size:1.2rem; animation-delay:0.2s;">✨</span>
+    <span class="sparkle" style="top:8%; right:32%; font-size:0.9rem; animation-delay:1.1s;">✨</span>
+    <span class="sparkle" style="top:38%; left:8%; font-size:1rem; animation-delay:0.8s;">✨</span>
+    <span class="sparkle" style="top:42%; right:6%; font-size:1.3rem; animation-delay:1.7s;">✨</span>
+    <span class="sparkle" style="bottom:34%; left:36%; font-size:1rem; animation-delay:0.4s;">✨</span>
+    <span class="sparkle" style="bottom:10%; right:34%; font-size:1.2rem; animation-delay:1.4s;">✨</span>
+  </div>
+
+  <!-- progress indicator — filled/current state is driven by updateProgress() in the script -->
+  <div class="progress-dots" id="progressDots" aria-hidden="true">
+    <span class="dot" data-step="gate"></span>
+    <span class="dot" data-step="apology"></span>
+    <span class="dot" data-step="listen"></span>
+    <span class="dot" data-step="promises"></span>
+    <span class="dot" data-step="gifts"></span>
+    <span class="dot" data-step="treats"></span>
+    <span class="dot" data-step="final"></span>
+  </div>
+
+  <!-- warning toast, shown by showWarningToast() in the script -->
+  <div class="toast" id="warningToast" role="alert" aria-live="assertive"></div>
+
+  <main class="stage">
+
+    <!-- ============================================================
+         SCREEN: GATE
+    ============================================================= -->
+    <section class="screen is-active" data-screen="gate">
+      <div class="card">
+        <div class="mascot mascot--float" aria-hidden="true">🐱</div>
+        <p class="msg-line">There's something for you, <span class="friend-name-slot"></span> 💌</p>
+        <p class="msg-line">Will you see it?</p>
+        <div class="btn-row">
+          <button class="btn btn-primary" data-goto="apology">Yes 💫</button>
+          <button class="btn btn-secondary" data-goto="guilt1">No 😟</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SCREEN: GUILT 1 (shown if they tap "No")
+    ============================================================= -->
+    <section class="screen" data-screen="guilt1">
+      <div class="card">
+        <div class="mascot mascot--shake" aria-hidden="true">🐼</div>
+        <p class="msg-line">Please don't do this 🥺</p>
+        <p class="msg-line">Give me one last chance to fix everything...</p>
+        <div class="btn-row">
+          <button class="btn btn-primary" data-goto="gate">Go Back 💫</button>
+          <button class="btn btn-secondary" data-goto="guilt2">Noooooo 😞</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SCREEN: GUILT 2 (only "Go Back" left — no more escaping)
+    ============================================================= -->
+    <section class="screen" data-screen="guilt2">
+      <div class="card">
+        <div class="mascot mascot--shake" aria-hidden="true">🐼</div>
+        <p class="msg-line msg-line--big">Pleaseeeee...</p>
+        <div class="btn-row">
+          <button class="btn btn-primary" data-goto="gate">Go Back 💫</button>
+          <!-- this is the terminal "no" — it looks like a button but never actually works -->
+          <button class="btn btn-disabled" id="terminalNoBtn" aria-disabled="true">No 😟</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SCREEN: APOLOGY — lines appear one by one
+    ============================================================= -->
+    <section class="screen" data-screen="apology">
+      <div class="card">
+        <div class="mascot mascot--bob" aria-hidden="true">🐻</div>
+        <p class="msg-name friend-name-slot"></p>
+        <div class="reveal-lines" id="apologyLines">
+          <!-- ✏️ EDIT: these lines appear one at a time — rewrite as your own -->
+          <p class="msg-line" data-line>I'm really sorry... 😔💔</p>
+          <p class="msg-line" data-line>I didn't mean to hurt you... 😔</p>
+          <p class="msg-line" data-line>I know I messed up, and I truly regret it... 😔🙏</p>
+          <p class="msg-line" data-line>You mean a lot to me... more than I show sometimes ❤️</p>
+          <p class="msg-line" data-line>And I hate seeing you upset because of me... 😔💬</p>
+        </div>
+        <div class="btn-row is-hidden" id="apologyNextRow">
+          <button class="btn btn-primary" data-goto="listen">Next ❤️</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SCREEN: LISTEN — 3-card carousel (JS-driven)
+    ============================================================= -->
+    <section class="screen" data-screen="listen">
+      <div class="card">
+        <div class="mascot" id="listenMascot" aria-hidden="true">😢</div>
+        <p class="msg-line" id="listenText"></p>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="listenBtn">Next 💫</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SCREEN: PROMISES — tap each pill to reveal it
+    ============================================================= -->
+    <section class="screen" data-screen="promises">
+      <div class="card">
+        <p class="section-title">My Promises to You, <span class="friend-name-slot"></span></p>
+        <div class="promise-list">
+          <!-- ✏️ EDIT: rewrite these as real promises you mean -->
+          <button class="promise-pill" data-reveal="I promise to listen to you more patiently ❤️">Tap to reveal 💫</button>
+          <button class="promise-pill" data-reveal="I promise to respect your feelings always 💫">Tap to reveal 💫</button>
+          <button class="promise-pill" data-reveal="I promise to make you smile even on bad days 😊">Tap to reveal 💫</button>
+          <button class="promise-pill" data-reveal="I promise to be a better friend to you, every day 💖">Tap to reveal 💫</button>
+        </div>
+        <div class="btn-row is-hidden" id="promisesNextRow">
+          <button class="btn btn-primary" data-goto="gifts">More surprise ✨</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SCREEN: GIFTS — tap each box to open it
+    ============================================================= -->
+    <section class="screen" data-screen="gifts">
+      <div class="card">
+        <p class="msg-line">I have something for you,</p>
+        <p class="msg-name friend-name-slot"></p>
+
+        <div id="giftRowWrap">
+          <p class="msg-line msg-line--small">Tap each gift to open it 💖</p>
+          <div class="gift-row">
+            <button class="gift-box" data-gift="0" aria-label="Open gift 1">🎁</button>
+            <button class="gift-box" data-gift="1" aria-label="Open gift 2">🎁</button>
+            <button class="gift-box" data-gift="2" aria-label="Open gift 3">🎁</button>
+          </div>
+          <div class="btn-row is-hidden" id="giftsContinueRow">
+            <button class="btn btn-primary" data-goto="treats">Continue ✨</button>
+          </div>
+        </div>
+
+        <div id="giftReveal" style="display:none;">
+          <div class="mascot mascot--bounce" id="giftEmoji" aria-hidden="true"></div>
+          <p class="msg-line" id="giftText"></p>
+          <div class="btn-row">
+            <button class="btn btn-primary" id="giftClaimBtn">Claim another gift</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SCREEN: TREATS — pick one
+    ============================================================= -->
+    <section class="screen" data-screen="treats">
+      <div class="card">
+        <p class="section-title">Choose your treat for our next hangout</p>
+        <p class="msg-line msg-line--small">Pick something you love... it's my treat 🎉</p>
+        <div class="treat-grid">
+          <button class="treat-box" data-treat="0" aria-label="Pizza">🍕</button>
+          <button class="treat-box" data-treat="1" aria-label="Momos">🥟</button>
+          <button class="treat-box" data-treat="2" aria-label="Movie">🎬</button>
+          <button class="treat-box" data-treat="3" aria-label="Coffee">☕</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SCREEN: TREAT CONFIRM
+    ============================================================= -->
+    <section class="screen" data-screen="treat-confirm">
+      <div class="card">
+        <div class="mascot mascot--bounce" id="treatConfirmEmoji" aria-hidden="true">🍕</div>
+        <p class="msg-line msg-line--big">Your choice is perfect, <span class="friend-name-slot"></span>! 😍</p>
+        <p class="msg-line">I already can't wait for our next hangout... 💖</p>
+        <p class="msg-line">Be ready, it's going to be special ✨</p>
+        <div class="btn-row">
+          <button class="btn btn-whatsapp" id="treatShareBtn">Share on WhatsApp 📲</button>
+          <button class="btn btn-primary" data-goto="final">Continue ❤️</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SCREEN: FINAL
+    ============================================================= -->
+    <section class="screen" data-screen="final">
+      <div class="card">
+        <div class="mascot mascot--blink" aria-hidden="true">🐱</div>
+        <p class="section-title">Now you forgive me</p>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="finalYesBtn">Yes, we're good 💛</button>
+          <!-- this "No" never works either — same rule as the guilt screen -->
+          <button class="btn btn-disabled" id="finalNoBtn" aria-disabled="true">No 😟</button>
+        </div>
+        <div class="final-success" id="finalSuccess">
+          <p class="msg-line">Please smile and do a video call 📞</p>
+          <p class="msg-line">I want to see your smile, <span class="friend-name-slot"></span>❤️</p>
+          <p class="msg-line msg-line--big">🎉 Thank you for reading all of this. It means everything.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <canvas id="confettiCanvas" class="confetti-canvas" aria-hidden="true"></canvas>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+
+    /* ============================================================
+       ✏️ EDIT: put your friend's real name here — every spot on the
+       page that shows a name updates automatically from this one line.
+    ============================================================= */
+    const FRIEND_NAME = "Ajunaaaaaaaa";
+    document.querySelectorAll('.friend-name-slot').forEach((el) => {
+      el.textContent = FRIEND_NAME;
+    });
+
+    /* ============================================================
+       SCREEN NAVIGATION
+       Every button with a data-goto attribute jumps to that screen.
+       Screens crossfade: the outgoing card fades/slides out first,
+       then the incoming one fades/slides in.
+    ============================================================= */
+    const screens = document.querySelectorAll('.screen');
+
+    // main path used for the progress dots — guilt1/guilt2 count as
+    // still being on "gate", and treat-confirm counts as "treats"
+    const STEP_ORDER = ['gate', 'apology', 'listen', 'promises', 'gifts', 'treats', 'final'];
+    const STEP_ALIAS = { guilt1: 'gate', guilt2: 'gate', 'treat-confirm': 'treats' };
+    const progressDots = document.querySelectorAll('.progress-dots .dot');
+
+    function updateProgress(id) {
+      const stepId = STEP_ALIAS[id] || id;
+      const idx = STEP_ORDER.indexOf(stepId);
+      progressDots.forEach((dot, i) => {
+        dot.classList.toggle('is-done', i < idx);
+        dot.classList.toggle('is-current', i === idx);
+      });
+    }
+
+    function showScreen(id) {
+      const current = document.querySelector('.screen.is-active');
+      const target = document.querySelector(`.screen[data-screen="${id}"]`);
+      if (!target || target === current) return;
+
+      updateProgress(id);
+
+      function enter() {
+        target.classList.add('is-active');
+        target.dispatchEvent(new CustomEvent('screen:shown'));
+        window.scrollTo(0, 0);
+      }
+
+      if (current) {
+        current.classList.remove('is-active');
+        current.classList.add('is-leaving');
+        current.addEventListener('animationend', function onOut() {
+          current.classList.remove('is-leaving');
+          current.removeEventListener('animationend', onOut);
+        }, { once: true });
+        setTimeout(enter, 180); // let most of the exit play before entering
+      } else {
+        enter();
+      }
+    }
+
+    document.querySelectorAll('[data-goto]').forEach((btn) => {
+      btn.addEventListener('click', () => showScreen(btn.dataset.goto));
+    });
+
+    updateProgress('gate'); // set the initial dot state on load
+
+    /* ============================================================
+       WARNING TOAST — used by every disabled "No" button on the page
+    ============================================================= */
+    const warningToast = document.getElementById('warningToast');
+    let toastTimer;
+
+    function showWarningToast(message) {
+      warningToast.textContent = message;
+      warningToast.classList.add('is-visible');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => warningToast.classList.remove('is-visible'), 2200);
+    }
+
+    // ✏️ EDIT: change this message if you want different wording.
+    // Any button with class "btn-disabled" gets this treatment — it looks
+    // clickable but always rejects the click with a shake + warning toast.
+    function wireDisabledButton(btn) {
+      if (!btn) return;
+      btn.addEventListener('click', () => {
+        showWarningToast('🚫 You are not allowed to perform this action');
+        btn.classList.remove('btn-shake');
+        void btn.offsetWidth; // restart the animation if clicked again quickly
+        btn.classList.add('btn-shake');
+      });
+    }
+
+    wireDisabledButton(document.getElementById('terminalNoBtn'));
+    wireDisabledButton(document.getElementById('finalNoBtn'));
+
+    /* ============================================================
+       APOLOGY SCREEN — lines fade in one at a time, then the
+       "Next" button appears once the last line has shown.
+    ============================================================= */
+    const apologyScreen = document.querySelector('.screen[data-screen="apology"]');
+    const apologyNextRow = document.getElementById('apologyNextRow');
+    let apologyPlayed = false;
+
+    apologyScreen.addEventListener('screen:shown', () => {
+      if (apologyPlayed) return; // only run the reveal once
+      apologyPlayed = true;
+      const lines = apologyScreen.querySelectorAll('[data-line]');
+      lines.forEach((line, i) => {
+        setTimeout(() => line.classList.add('is-shown'), 400 + i * 700);
+      });
+      setTimeout(() => apologyNextRow.classList.remove('is-hidden'), 400 + lines.length * 700);
+    });
+
+    /* ============================================================
+       LISTEN SCREEN — 3-card carousel.
+       ✏️ EDIT: rewrite the lines/emoji below for your own three cards.
+    ============================================================= */
+    const LISTEN_CARDS = [
+      {
+        emoji: '😢',
+        mascotClass: 'mascot--shake',
+        // note: "karti" is feminine Hindi grammar — change to "karta" if your friend is male
+        html: 'Ab tum baat nahi karti... toh yaha Dard hota hai 💔',
+      },
+      {
+        emoji: '🍌',
+        mascotClass: 'mascot--dance',
+        html: 'I am <u>AKELA</u> without you....',
+      },
+      {
+        emoji: '🐻',
+        mascotClass: 'mascot--bob',
+        html: "I'm not happy without you...<br>I miss you. A lot. 🥺",
+      },
+    ];
+
+    let listenIndex = 0;
+    const listenScreen = document.querySelector('.screen[data-screen="listen"]');
+    const listenMascot = document.getElementById('listenMascot');
+    const listenText = document.getElementById('listenText');
+    const listenBtn = document.getElementById('listenBtn');
+
+    function renderListenCard() {
+      const card = LISTEN_CARDS[listenIndex];
+      listenMascot.className = 'mascot ' + card.mascotClass;
+      listenMascot.textContent = card.emoji;
+      listenText.innerHTML = card.html;
+    }
+
+    listenScreen.addEventListener('screen:shown', () => {
+      listenIndex = 0;
+      renderListenCard();
+    });
+
+    listenBtn.addEventListener('click', () => {
+      listenIndex++;
+      if (listenIndex < LISTEN_CARDS.length) {
+        renderListenCard();
+      } else {
+        showScreen('promises');
+      }
+    });
+
+    /* ============================================================
+       PROMISES SCREEN — tap a pill to reveal it. Once all four
+       are revealed, the "More surprise" button appears.
+    ============================================================= */
+    const promisesNextRow = document.getElementById('promisesNextRow');
+    const promisePills = document.querySelectorAll('.promise-pill');
+
+    promisePills.forEach((pill) => {
+      pill.addEventListener('click', () => {
+        if (pill.classList.contains('is-revealed')) return;
+        pill.textContent = pill.dataset.reveal;
+        pill.classList.add('is-revealed', 'is-revealing');
+        setTimeout(() => pill.classList.remove('is-revealing'), 450);
+        const allRevealed = [...promisePills].every((p) => p.classList.contains('is-revealed'));
+        if (allRevealed) promisesNextRow.classList.remove('is-hidden');
+      });
+    });
+
+    /* ============================================================
+       GIFTS SCREEN — tap a box to reveal that gift's message.
+       Once all three have been opened at least once, "Continue"
+       appears instead of the gift row.
+       ✏️ EDIT: rewrite these three gift messages.
+    ============================================================= */
+    const GIFTS = [
+      { emoji: '💐', text: `These flowers are for you, ${FRIEND_NAME} — just a small way of saying I'm really sorry. You deserve all the beautiful things in the world 🌸` },
+      { emoji: '🧸', text: `A little bear to keep you company, ${FRIEND_NAME} — for the days you need a hug and I'm not around.` },
+      { emoji: '🍫', text: `A little something sweet, for someone who makes my life sweeter, ${FRIEND_NAME} 🍫` },
+    ];
+
+    const openedGifts = new Set();
+    const giftRowWrap = document.getElementById('giftRowWrap');
+    const giftReveal = document.getElementById('giftReveal');
+    const giftEmoji = document.getElementById('giftEmoji');
+    const giftText = document.getElementById('giftText');
+    const giftClaimBtn = document.getElementById('giftClaimBtn');
+    const giftsContinueRow = document.getElementById('giftsContinueRow');
+
+    document.querySelectorAll('.gift-box').forEach((box) => {
+      box.addEventListener('click', () => {
+        const idx = parseInt(box.dataset.gift, 10);
+        openedGifts.add(idx);
+        box.classList.add('is-opened', 'pop');
+        box.textContent = '✅';
+
+        const gift = GIFTS[idx];
+        giftEmoji.textContent = gift.emoji;
+        giftText.textContent = gift.text;
+        giftRowWrap.style.display = 'none';
+        giftReveal.style.display = 'block';
+      });
+    });
+
+    giftClaimBtn.addEventListener('click', () => {
+      giftReveal.style.display = 'none';
+      giftRowWrap.style.display = 'block';
+      if (openedGifts.size >= GIFTS.length) {
+        giftsContinueRow.classList.remove('is-hidden');
+      }
+    });
+
+    /* ============================================================
+       TREATS SCREEN — pick one, then move to the confirmation.
+       ✏️ EDIT: rewrite these four treats (emoji + label) for your own.
+    ============================================================= */
+    const TREAT_EMOJI = ['🍕', '🥟', '🎬', '☕'];
+    const TREAT_LABELS = ['Pizza', 'Momos', 'Movie', 'Coffee'];
+    const treatConfirmEmoji = document.getElementById('treatConfirmEmoji');
+    let selectedTreatIndex = 0;
+
+    document.querySelectorAll('.treat-box').forEach((box) => {
+      box.addEventListener('click', () => {
+        const idx = parseInt(box.dataset.treat, 10);
+        selectedTreatIndex = idx;
+        box.classList.add('pop');
+        treatConfirmEmoji.textContent = TREAT_EMOJI[idx];
+        setTimeout(() => showScreen('treat-confirm'), 150);
+      });
+    });
+
+    /* ============================================================
+       TREAT CONFIRM SCREEN — "Share on WhatsApp" sends the chosen
+       treat as a pre-filled message. No number is hard-coded, so
+       WhatsApp opens its own contact picker to choose who it goes
+       to. ✏️ EDIT: to skip the picker and always send to one chat,
+       change the URL below to
+       'https://wa.me/<countrycode+number>?text=...'
+    ============================================================= */
+    const treatShareBtn = document.getElementById('treatShareBtn');
+    treatShareBtn.addEventListener('click', () => {
+      const message = `I picked ${TREAT_EMOJI[selectedTreatIndex]} ${TREAT_LABELS[selectedTreatIndex]} for our next hangout! Can't wait 💖`;
+      window.open('https://wa.me/?text=' + encodeURIComponent(message), '_blank');
+    });
+
+    /* ============================================================
+       FINAL SCREEN — confetti cannon (vanilla canvas, no library)
+    ============================================================= */
+    const finalYesBtn = document.getElementById('finalYesBtn');
+    const finalSuccess = document.getElementById('finalSuccess');
+    const confettiCanvas = document.getElementById('confettiCanvas');
+    const confettiCtx = confettiCanvas.getContext('2d');
+
+    // ✏️ EDIT: swap these for your own colors
+    const CONFETTI_COLORS = ['#F5A9C6', '#EC4899', '#FFD1DC', '#FFFFFF', '#FBCFE8'];
+    let confettiParticles = [];
+    let confettiRunning = false;
+
+    function spawnConfetti() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+      confettiCanvas.style.display = 'block';
+
+      for (let i = 0; i < 160; i++) {
+        confettiParticles.push({
+          x: Math.random() * confettiCanvas.width,
+          y: -20,
+          vx: (Math.random() - 0.5) * 3,
+          vy: 2 + Math.random() * 3,
+          size: 5 + Math.random() * 6,
+          color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+          rotation: Math.random() * 360,
+          rotationSpeed: (Math.random() - 0.5) * 10,
+          age: 0,
+          maxAge: 200 + Math.random() * 80,
+        });
+      }
+
+      if (!confettiRunning) {
+        confettiRunning = true;
+        requestAnimationFrame(confettiTick);
+      }
+    }
+
+    function confettiTick() {
+      confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+
+      confettiParticles.forEach((p) => {
+        p.vy += 0.05;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.rotation += p.rotationSpeed;
+        p.age++;
+
+        confettiCtx.save();
+        confettiCtx.translate(p.x, p.y);
+        confettiCtx.rotate((p.rotation * Math.PI) / 180);
+        confettiCtx.globalAlpha = Math.max(0, 1 - p.age / p.maxAge);
+        confettiCtx.fillStyle = p.color;
+        confettiCtx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+        confettiCtx.restore();
+      });
+
+      confettiParticles = confettiParticles.filter(
+        (p) => p.age < p.maxAge && p.y < confettiCanvas.height + 40
+      );
+
+      if (confettiParticles.length > 0) {
+        requestAnimationFrame(confettiTick);
+      } else {
+        confettiRunning = false;
+        confettiCanvas.style.display = 'none';
+      }
+    }
+
+    finalYesBtn.addEventListener('click', () => {
+      spawnConfetti();
+      finalYesBtn.style.display = 'none';
+      finalSuccess.style.transition = 'opacity 0.6s ease';
+      finalSuccess.style.opacity = '1';
+    });
+
+    window.addEventListener('resize', () => {
+      if (confettiRunning) {
+        confettiCanvas.width = window.innerWidth;
+        confettiCanvas.height = window.innerHeight;
+      }
+    });
+
+  });
+  </script>
+
+</body>
+</html>
